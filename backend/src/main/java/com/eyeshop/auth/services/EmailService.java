@@ -1,0 +1,16 @@
+package com.eyeshop.auth.services;   
+
+public interface EmailService {
+
+    void sendVerificationEmail(String toEmail, String userName, String verificationToken);
+
+    void sendPasswordResetEmail(String toEmail, String userName, String resetToken);
+
+    void sendWelcomeEmail(String toEmail, String userName);
+
+    void sendPasswordChangedEmail(String toEmail, String userName);
+
+    void sendAccountLockedEmail(String toEmail, String userName, int maxAttempts, int lockDurationMinutes);
+
+    void sendAccountUnlockedEmail(String toEmail, String userName);
+}

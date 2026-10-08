@@ -1,5 +1,6 @@
 package com.eyeshop.order.controller;
 
+import java.util.UUID;
 import com.eyeshop.order.dto.request.OrderRequest;
 import com.eyeshop.order.dto.response.OrderResponse;
 import com.eyeshop.order.service.OrderService;
@@ -42,7 +43,7 @@ public class OrderController {
 
     // Get Orders By User Id
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<OrderResponse>> getOrdersByUserId(@PathVariable Long userId){
+    public ResponseEntity<List<OrderResponse>> getOrdersByUserId(@PathVariable UUID userId){
         return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
     }
 

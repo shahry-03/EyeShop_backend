@@ -19,3 +19,35 @@ spring:
 
 server:
   port: 8080
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: YOUR_SMTP_USERNAME
+    password: YOUR_SMTP_PASSWORD
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+universal:
+  auth:
+    jwt-secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    jwt-expiration-ms: 3600000 # 1 hour
+    refresh-token-expiration-ms: 86400000 # 24 hours
+
+app:
+  rate-limit:
+    enabled: true
+  mail:
+    from: noreply@example.com
+    from-name: "EyeShop Admin"
+  frontend:
+    base-url: "http://localhost:3000"
+  2fa:
+    issuer: "EyeShop"
+  security:
+    account-lockout:
+      max-failed-attempts: 5
+      lockout-duration-minutes: 15

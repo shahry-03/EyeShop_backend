@@ -1,5 +1,6 @@
 package com.eyeshop.order.service;
 
+import java.util.UUID;
 import com.eyeshop.order.dto.request.OrderItemRequest;
 import com.eyeshop.order.dto.request.OrderRequest;
 import com.eyeshop.order.dto.response.OrderResponse;
@@ -9,7 +10,7 @@ import com.eyeshop.order.entity.Status;
 import com.eyeshop.order.repository.OrderRepository;
 import com.eyeshop.product.entity.Product;
 import com.eyeshop.product.repository.ProductRepository;
-import com.eyeshop.user.repository.UserRepository;
+import com.eyeshop.auth.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,7 +97,7 @@ public class OrderService {
     }
 
     // --- Get Orders by userId
-    public List<OrderResponse> getOrdersByUserId(Long userId) {
+    public List<OrderResponse> getOrdersByUserId(UUID userId) {
         return orderRepository.findByUserId(userId)
                 .stream()
                 .map(OrderResponse::fromEntity)

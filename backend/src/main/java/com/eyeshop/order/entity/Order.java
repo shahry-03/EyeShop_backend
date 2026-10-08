@@ -1,5 +1,6 @@
 package com.eyeshop.order.entity;
 
+import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,7 +23,7 @@ public class Order {
     private Long id;
 
     @Column(nullable = false)
-    private Long userId;
+    private UUID userId;
 
 
     @Column(nullable = false)

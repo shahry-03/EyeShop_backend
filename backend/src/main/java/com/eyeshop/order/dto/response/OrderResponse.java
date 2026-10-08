@@ -1,5 +1,6 @@
 package com.eyeshop.order.dto.response;
 
+import java.util.UUID;
 import com.eyeshop.order.entity.Order;
 import com.eyeshop.order.entity.OrderItem;
 import com.eyeshop.order.entity.Status;
@@ -16,7 +17,7 @@ public class OrderResponse {
 
     private Long id;
 
-    private Long userId;
+    private UUID userId;
 
     private Double totalPrice;
 
