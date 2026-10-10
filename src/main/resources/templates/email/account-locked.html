@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body style="font-family: Arial, sans-serif; padding: 20px;">
+    <h2>⚠️ Account Locked</h2>
+    <p>Hi <span th:text="${userName}">User</span>,</p>
+    <p>Your account was locked after <span th:text="${maxAttempts}">5</span> failed login attempts.</p>
+    <p>It will auto-unlock in <span th:text="${lockDurationMinutes}">15</span> minutes, or reset your password:</p>
+    <p><a th:href="${resetPasswordLink}">Reset Password</a></p>
+</body>
+</html>

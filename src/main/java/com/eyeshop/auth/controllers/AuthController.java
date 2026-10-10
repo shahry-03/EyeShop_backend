@@ -108,10 +108,13 @@ public class AuthController {
     //  LOGOUT
     // ─────────────────────────────────────────────
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request,
-                                       HttpServletResponse response) {
+    public ResponseEntity<Void> logout(
+            @RequestBody(required = false) RefreshTokenRequest body,   // ← ADD
+            HttpServletRequest request,
+            HttpServletResponse response) {
 
-        refreshTokenExtractor.extract(null, request)
+        // Extract from cookie → body → header (priority order)
+        refreshTokenExtractor.extract(body, request)                   // ← pass body
             .ifPresent(authService::logout);
 
         cookieService.clearRefreshCookie(response);

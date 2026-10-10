@@ -1,16 +1,19 @@
 package com.eyeshop.order.entity;
 
-import java.util.UUID;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", indexes = {
+    @Index(name = "orders_user_id_idx", columnList = "user_id"),
+    @Index(name = "orders_status_idx", columnList = "status")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,27 +25,24 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-
-    @Column(nullable = false)
+    @Column(name = "total_price", nullable = false)
     private Double totalPrice;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private Status status;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
-
-
-
 }

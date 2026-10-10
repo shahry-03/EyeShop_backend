@@ -22,8 +22,8 @@ public class RefreshTokenExtractor {
     private final JwtService jwtService;
 
     public Optional<String> extract(RefreshTokenRequest body, HttpServletRequest request) {
-        return extractFromCookie(request)
-            .or(() -> extractFromBody(body))
+        return extractFromBody(body)                          // ← Body pehle (API-first)
+            .or(() -> extractFromCookie(request))
             .or(() -> extractFromCustomHeader(request))
             .or(() -> extractFromAuthorizationHeader(request));
     }

@@ -4,6 +4,7 @@ import com.eyeshop.auth.entity.User;
 import com.eyeshop.auth.entity.VerificationToken;
 import com.eyeshop.auth.repositories.VerificationTokenRepository;
 import com.eyeshop.auth.services.VerificationTokenService;
+import com.eyeshop.auth.exception.InvalidTokenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -59,14 +60,14 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     @Transactional(readOnly = true)
     public VerificationToken validateToken(String tokenValue, VerificationToken.TokenType type) {
         VerificationToken token = tokenRepository.findByTokenAndType(tokenValue, type)
-            .orElseThrow(() -> new BadCredentialsException("Invalid or expired token"));
+            .orElseThrow(() -> new InvalidTokenException("Invalid or unknown token"));
 
         if (token.isUsed()) {
-            throw new BadCredentialsException("Token already used");
+            throw new InvalidTokenException("Token has already been used");
         }
 
         if (token.isExpired()) {
-            throw new BadCredentialsException("Token expired");
+            throw new InvalidTokenException("Token has expired. Please request a new one.");
         }
 
         return token;

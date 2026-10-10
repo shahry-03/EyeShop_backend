@@ -20,8 +20,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.eyeshop.auth.exception.EmailNotVerifiedException;
 import com.eyeshop.auth.exception.RateLimitExceededException;
 import com.eyeshop.auth.exception.AccountLockedException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import com.eyeshop.order.exception.InsufficientStockException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import com.eyeshop.auth.exception.InvalidTokenException;
 
 @Slf4j
 @RestControllerAdvice
@@ -264,6 +270,106 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.LOCKED)
             .header("X-Account-Locked-Until", ex.getLockedUntil().toString())
             .body(error);
+    }
+
+
+    // ═══════════════════════════════════════════════════════════════
+    //  400 — INSUFFICIENT STOCK (Order module)
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ApiError> handleInsufficientStock(
+            InsufficientStockException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.BAD_REQUEST.value(),
+            "Insufficient Stock",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  409 — OPTIMISTIC LOCK CONFLICT (concurrent stock update)
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiError> handleOptimisticLock(
+            ObjectOptimisticLockingFailureException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.CONFLICT.value(),
+            "Conflict",
+            "This item was just updated by someone else. Please refresh and try again.",
+            request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  400 — INVALID TOKEN (used/expired verification or reset token)
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ApiError> handleInvalidToken(
+            InvalidTokenException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.BAD_REQUEST.value(),
+            "Invalid Token",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
+
+    // ═══════════════════════════════════════════════════════════════
+    //  404 — STATIC RESOURCE / ENDPOINT NOT FOUND
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handleNoResource(
+            org.springframework.web.servlet.resource.NoResourceFoundException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            "Endpoint not found: " + request.getRequestURI(),
+            request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+
+    // ═══════════════════════════════════════════════════════════════
+    //  400 — TYPE MISMATCH (invalid UUID, invalid Long, etc.)
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+
+        String message = String.format(
+            "Invalid value '%s' for parameter '%s'. Expected type: %s",
+            ex.getValue(),
+            ex.getName(),
+            ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown"
+        );
+
+        ApiError error = ApiError.of(
+            HttpStatus.BAD_REQUEST.value(),
+            "Bad Request",
+            message,
+            request.getRequestURI());
+
+        return ResponseEntity.badRequest().body(error);
     }
 
 
