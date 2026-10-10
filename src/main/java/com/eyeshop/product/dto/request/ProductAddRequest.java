@@ -1,27 +1,26 @@
 package com.eyeshop.product.dto.request;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.Size;
 
-@Getter
-@Setter
-public class ProductAddRequest {
+public record ProductAddRequest(
 
     @NotBlank(message = "Name cannot be empty")
-    private String name;
+    @Size(max = 200, message = "Name must not exceed 200 characters")
+    String name,
 
-    private String description;
+    @Size(max = 2000, message = "Description must not exceed 2000 characters")
+    String description,
 
     @Positive(message = "Price must be greater than zero")
-    private double price;
+    double price,
 
     @Min(value = 0, message = "Stock must be greater than or equal to zero")
-    private int stock;
+    int stock,
 
     @NotBlank(message = "Category cannot be empty")
-    private String category;
-}
+    @Size(max = 100, message = "Category must not exceed 100 characters")
+    String category
+) {}

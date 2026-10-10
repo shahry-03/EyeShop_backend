@@ -1,5 +1,6 @@
 package com.eyeshop.product.controller;
 
+import com.eyeshop.auth.dto.response.ApiResponse;
 import com.eyeshop.product.dto.request.ProductAddRequest;
 import com.eyeshop.product.dto.request.ProductUpdateRequest;
 import com.eyeshop.product.dto.response.ProductResponse;
@@ -8,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,47 +18,61 @@ import java.util.List;
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
+
     private final ProductService productService;
 
-    // Admin methods
-    // Add Product
+    // ═══════════════════════════════════════════════════════════
+    //  ADMIN — write operations
+    // ═══════════════════════════════════════════════════════════
+
     @PostMapping
-    public ResponseEntity<ProductResponse> addProduct(@RequestBody @Valid ProductAddRequest productAddRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.addProduct(productAddRequest));
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<ProductResponse>> addProduct(
+            @Valid @RequestBody ProductAddRequest request) {
+
+        ProductResponse response = productService.addProduct(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.success("Product created", response));
     }
 
-    // Update Product
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductUpdateRequest productUpdateRequest) {
-        return ResponseEntity.ok(productService.updateProduct(id, productUpdateRequest));
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductUpdateRequest request) {
+
+        ProductResponse response = productService.updateProduct(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Product updated", response));
     }
 
-    // Delete Product
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Product deleted"));
     }
 
-    // Customer methods
-    // Get All Products
+    // ═══════════════════════════════════════════════════════════
+    //  PUBLIC (authenticated users) — read operations
+    // ═══════════════════════════════════════════════════════════
+
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts() {
+        return ResponseEntity.ok(ApiResponse.success(productService.getAllProducts()));
     }
 
-    // Get Product By Id
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getProductById(id));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(productService.getProductById(id)));
     }
 
-    // Get Products By Category
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<ProductResponse>> getProductsByCategory(@PathVariable String category) {
-        return ResponseEntity.ok(productService.getProductsByCategory(category));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsByCategory(
+            @PathVariable String category) {
+        return ResponseEntity.ok(ApiResponse.success(
+            productService.getProductsByCategory(category)));
     }
-
-
-
 }

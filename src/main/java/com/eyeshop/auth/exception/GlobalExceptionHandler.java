@@ -373,5 +373,43 @@ public class GlobalExceptionHandler {
     }
 
 
+
+    // ═══════════════════════════════════════════════════════════════
+    //  404 — PRODUCT NOT FOUND
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(com.eyeshop.product.exception.ProductNotFoundException.class)
+    public ResponseEntity<ApiError> handleProductNotFound(
+            com.eyeshop.product.exception.ProductNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  409 — DUPLICATE PRODUCT
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(com.eyeshop.product.exception.DuplicateProductException.class)
+    public ResponseEntity<ApiError> handleDuplicateProduct(
+            com.eyeshop.product.exception.DuplicateProductException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.CONFLICT.value(),
+            "Conflict",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+
 }
 
