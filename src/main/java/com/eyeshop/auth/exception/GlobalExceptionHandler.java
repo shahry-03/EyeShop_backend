@@ -410,6 +410,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    //  409 — INVALID STATUS TRANSITION
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(com.eyeshop.order.exception.InvalidStatusTransitionException.class)
+    public ResponseEntity<ApiError> handleInvalidStatusTransition(
+            com.eyeshop.order.exception.InvalidStatusTransitionException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.CONFLICT.value(),
+            "Invalid Status Transition",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
 
 }
 

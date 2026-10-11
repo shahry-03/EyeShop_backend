@@ -1,6 +1,5 @@
 package com.eyeshop.order.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -20,7 +19,6 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
-    @JsonBackReference
     private Order order;
 
     @Column(nullable = false)

@@ -13,5 +13,6 @@ public record OrderResponse(
     Status status,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
-    List<OrderItemResponse> items
+    List<OrderItemResponse> items,
+    List<OrderStatusHistoryResponse> statusHistory
 ) {}

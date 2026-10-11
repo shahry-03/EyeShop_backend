@@ -2,20 +2,16 @@ package com.eyeshop.order.mapper;
 
 import com.eyeshop.order.dto.response.OrderItemResponse;
 import com.eyeshop.order.dto.response.OrderResponse;
+import com.eyeshop.order.dto.response.OrderStatusHistoryResponse;
 import com.eyeshop.order.entity.Order;
 import com.eyeshop.order.entity.OrderItem;
+import com.eyeshop.order.entity.OrderStatusHistory;
 
 import java.util.List;
 
-/**
- * Manual mapper for Order entity ↔ DTOs.
- * Static methods — no Spring bean needed, no dependencies.
- */
 public final class OrderMapper {
 
-    private OrderMapper() {
-        // utility class — no instances
-    }
+    private OrderMapper() {}
 
     public static OrderResponse toResponse(Order order) {
         if (order == null) return null;
@@ -26,23 +22,36 @@ public final class OrderMapper {
             order.getStatus(),
             order.getCreatedAt(),
             order.getUpdatedAt(),
-            toItemResponseList(order.getItems())
+            toItemResponseList(order.getItems()),
+            toHistoryResponseList(order.getStatusHistory())
         );
     }
 
     public static OrderItemResponse toItemResponse(OrderItem item) {
         if (item == null) return null;
-        return new OrderItemResponse(
-            item.getProductId(),
-            item.getQuantity(),
-            item.getPrice()
+        return new OrderItemResponse(item.getProductId(), item.getQuantity(), item.getPrice());
+    }
+
+    public static OrderStatusHistoryResponse toHistoryResponse(OrderStatusHistory h) {
+        if (h == null) return null;
+        return new OrderStatusHistoryResponse(
+            h.getId(),
+            h.getFromStatus(),
+            h.getToStatus(),
+            h.getChangedBy(),
+            h.getNote(),
+            h.getChangedAt()
         );
     }
 
     private static List<OrderItemResponse> toItemResponseList(List<OrderItem> items) {
         if (items == null || items.isEmpty()) return List.of();
-        return items.stream()
-            .map(OrderMapper::toItemResponse)
-            .toList();
+        return items.stream().map(OrderMapper::toItemResponse).toList();
+    }
+
+    private static List<OrderStatusHistoryResponse> toHistoryResponseList(
+            List<OrderStatusHistory> history) {
+        if (history == null || history.isEmpty()) return List.of();
+        return history.stream().map(OrderMapper::toHistoryResponse).toList();
     }
 }

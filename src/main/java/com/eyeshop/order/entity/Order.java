@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "orders", indexes = {
@@ -45,4 +46,9 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("changedAt ASC")
+    @Builder.Default
+    private List<OrderStatusHistory> statusHistory = new ArrayList<>();
 }
