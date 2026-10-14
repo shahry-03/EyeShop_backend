@@ -1,6 +1,7 @@
 package com.eyeshop.order.service;
 
 import com.eyeshop.common.dto.response.PageResponse;
+import com.eyeshop.order.dto.request.CheckoutRequest;
 import com.eyeshop.order.dto.request.OrderRequest;
 import com.eyeshop.order.dto.request.OrderStatusUpdateRequest;
 import com.eyeshop.order.dto.response.OrderResponse;
@@ -11,6 +12,9 @@ import java.util.UUID;
 public interface OrderService {
 
     OrderResponse placeOrder(UUID userId, OrderRequest request);
+
+    /** Place an order from the user's active cart. */
+    OrderResponse checkout(UUID userId, CheckoutRequest request);
 
     OrderResponse getOrderById(Long orderId, UUID requestingUserId, boolean isAdmin);
 

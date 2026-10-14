@@ -29,6 +29,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eyeshop.common.dto.response.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.eyeshop.cart.entity.Cart;
+import com.eyeshop.cart.entity.CartItem;
+import com.eyeshop.cart.exception.CartNotFoundException;
+import com.eyeshop.cart.repository.CartRepository;
+import com.eyeshop.cart.service.CartService;
+import com.eyeshop.order.dto.request.CheckoutRequest;
+import com.eyeshop.order.exception.EmptyCartException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +55,8 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final AddressRepository addressRepository;
+    private final CartRepository cartRepository;
+    private final CartService cartService;
 
     /**
      * Allowed status transitions — the state machine.
@@ -286,6 +295,101 @@ public class OrderServiceImpl implements OrderService {
             orderId, current, target, adminUserId);
 
         return OrderMapper.toResponse(saved, fetchShippingAddress(saved));
+    }
+
+
+    // ═══════════════════════════════════════════════════════════
+    //  CHECKOUT — build order from user's active cart
+    // ═══════════════════════════════════════════════════════════
+    @Override
+    @Transactional
+    public OrderResponse checkout(UUID userId, CheckoutRequest request) {
+
+        // 1. Verify user exists
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        // 2. Load user's cart — must exist and be non-empty
+        Cart cart = cartRepository.findByUserId(userId)
+            .orElseThrow(() -> new CartNotFoundException(
+                "Cart not found for user: " + userId));
+
+        if (cart.getItems().isEmpty()) {
+            throw new EmptyCartException();
+        }
+
+        // 3. Validate shipping address ownership
+        Address shippingAddress = addressRepository
+            .findByIdAndUserId(request.shippingAddressId(), userId)
+            .orElseThrow(() -> new AddressNotFoundException(
+                "Shipping address not found or does not belong to you: "
+                    + request.shippingAddressId()));
+
+        // 4. Build order items from cart + deduct stock + compute total
+        List<OrderItem> orderItems = new ArrayList<>();
+        double totalPrice = 0.0;
+
+        for (CartItem cartItem : cart.getItems()) {
+
+            Product product = productRepository.findById(cartItem.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                    "Product not found: " + cartItem.getProductId()));
+
+            // Stock check (may have changed since add-to-cart)
+            if (product.getStock() < cartItem.getQuantity()) {
+                throw new InsufficientStockException(
+                    String.format("Insufficient stock for '%s'. Available: %d, requested: %d",
+                        product.getName(), product.getStock(), cartItem.getQuantity()));
+            }
+
+            // Use snapshot price from cart (respects price at add-to-cart time)
+            double lineTotal = cartItem.getPrice() * cartItem.getQuantity();
+            totalPrice += lineTotal;
+
+            // Deduct stock
+            product.setStock(product.getStock() - cartItem.getQuantity());
+            productRepository.save(product);
+
+            // Snapshot into order item
+            OrderItem orderItem = OrderItem.builder()
+                .productId(product.getId())
+                .quantity(cartItem.getQuantity())
+                .price(cartItem.getPrice())
+                .build();
+
+            orderItems.add(orderItem);
+        }
+
+        // 5. Build order
+        Order order = Order.builder()
+            .userId(user.getId())
+            .shippingAddressId(shippingAddress.getId())
+            .totalPrice(totalPrice)
+            .status(Status.PLACED)
+            .items(orderItems)
+            .build();
+
+        orderItems.forEach(item -> item.setOrder(order));
+
+        // 6. Initial status history
+        order.getStatusHistory().add(OrderStatusHistory.builder()
+            .order(order)
+            .fromStatus(null)
+            .toStatus(Status.PLACED)
+            .changedBy(user.getId())
+            .note("Order placed via cart checkout")
+            .build());
+
+        // 7. Persist order
+        Order saved = orderRepository.save(order);
+
+        // 8. Clear the cart (same transaction — atomic)
+        cartService.emptyCartForUser(userId);
+
+        log.info("Checkout success: orderId={}, userId={}, items={}, total={}, addressId={}",
+            saved.getId(), userId, orderItems.size(), totalPrice, shippingAddress.getId());
+
+        return OrderMapper.toResponse(saved, shippingAddress);
     }
 
     // ═══════════════════════════════════════════════════════════════

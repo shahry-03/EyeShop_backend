@@ -16,6 +16,7 @@ import com.eyeshop.common.dto.response.PageResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import com.eyeshop.order.dto.request.CheckoutRequest;
 
 import java.util.List;
 
@@ -39,6 +40,19 @@ public class OrderController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success("Order placed successfully", response));
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  CHECKOUT — order from cart
+    // ═══════════════════════════════════════════════════════════
+    @PostMapping("/checkout")
+    public ResponseEntity<ApiResponse<OrderResponse>> checkout(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody CheckoutRequest request) {
+
+        OrderResponse response = orderService.checkout(user.getId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.success("Checkout successful", response));
     }
 
     // ─────────────────────────────────────────────

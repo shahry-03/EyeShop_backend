@@ -502,5 +502,24 @@ public class GlobalExceptionHandler {
     }
 
 
+    // ═══════════════════════════════════════════════════════════
+    //  400 — EMPTY CART
+    // ═══════════════════════════════════════════════════════════
+
+    @ExceptionHandler(com.eyeshop.order.exception.EmptyCartException.class)
+    public ResponseEntity<ApiError> handleEmptyCart(
+            com.eyeshop.order.exception.EmptyCartException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.BAD_REQUEST.value(),
+            "Empty Cart",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
+
 }
 
