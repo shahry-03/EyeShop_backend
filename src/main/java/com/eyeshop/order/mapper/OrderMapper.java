@@ -1,5 +1,8 @@
 package com.eyeshop.order.mapper;
 
+import com.eyeshop.address.dto.response.AddressResponse;
+import com.eyeshop.address.entity.Address;
+import com.eyeshop.address.mapper.AddressMapper;
 import com.eyeshop.order.dto.response.OrderItemResponse;
 import com.eyeshop.order.dto.response.OrderResponse;
 import com.eyeshop.order.dto.response.OrderStatusHistoryResponse;
@@ -13,7 +16,11 @@ public final class OrderMapper {
 
     private OrderMapper() {}
 
-    public static OrderResponse toResponse(Order order) {
+    /**
+     * Map order → response. Shipping address object needs to be passed in
+     * (avoid N+1 queries by fetching it separately).
+     */
+    public static OrderResponse toResponse(Order order, Address shippingAddress) {
         if (order == null) return null;
         return new OrderResponse(
             order.getId(),
@@ -22,6 +29,7 @@ public final class OrderMapper {
             order.getStatus(),
             order.getCreatedAt(),
             order.getUpdatedAt(),
+            AddressMapper.toResponse(shippingAddress),
             toItemResponseList(order.getItems()),
             toHistoryResponseList(order.getStatusHistory())
         );
@@ -35,13 +43,8 @@ public final class OrderMapper {
     public static OrderStatusHistoryResponse toHistoryResponse(OrderStatusHistory h) {
         if (h == null) return null;
         return new OrderStatusHistoryResponse(
-            h.getId(),
-            h.getFromStatus(),
-            h.getToStatus(),
-            h.getChangedBy(),
-            h.getNote(),
-            h.getChangedAt()
-        );
+            h.getId(), h.getFromStatus(), h.getToStatus(),
+            h.getChangedBy(), h.getNote(), h.getChangedAt());
     }
 
     private static List<OrderItemResponse> toItemResponseList(List<OrderItem> items) {

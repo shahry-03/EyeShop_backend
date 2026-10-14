@@ -1,18 +1,20 @@
 package com.eyeshop.product.controller;
 
 import com.eyeshop.auth.dto.response.ApiResponse;
+import com.eyeshop.common.dto.response.PageResponse;
 import com.eyeshop.product.dto.request.ProductAddRequest;
 import com.eyeshop.product.dto.request.ProductUpdateRequest;
 import com.eyeshop.product.dto.response.ProductResponse;
 import com.eyeshop.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -53,13 +55,17 @@ public class ProductController {
     }
 
     // ═══════════════════════════════════════════════════════════
-    //  PUBLIC (authenticated users) — read operations
+    //  PUBLIC (authenticated) — read operations
     // ═══════════════════════════════════════════════════════════
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts() {
-        return ResponseEntity.ok(ApiResponse.success(productService.getAllProducts()));
+    public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getAllProducts(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+
+        return ResponseEntity.ok(ApiResponse.success(
+            productService.getAllProducts(pageable)));
     }
 
     @GetMapping("/{id}")
@@ -70,9 +76,12 @@ public class ProductController {
 
     @GetMapping("/category/{category}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsByCategory(
-            @PathVariable String category) {
+    public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getProductsByCategory(
+            @PathVariable String category,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+
         return ResponseEntity.ok(ApiResponse.success(
-            productService.getProductsByCategory(category)));
+            productService.getProductsByCategory(category, pageable)));
     }
 }

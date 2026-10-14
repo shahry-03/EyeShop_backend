@@ -428,6 +428,79 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    //  404 — ADDRESS NOT FOUND
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(com.eyeshop.address.exception.AddressNotFoundException.class)
+    public ResponseEntity<ApiError> handleAddressNotFound(
+            com.eyeshop.address.exception.AddressNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+
+    // ═══════════════════════════════════════════════════════════════
+    //  400 — INVALID PAGINATION / SORT FIELD
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(org.springframework.data.mapping.PropertyReferenceException.class)
+    public ResponseEntity<ApiError> handlePropertyReference(
+            org.springframework.data.mapping.PropertyReferenceException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.BAD_REQUEST.value(),
+            "Invalid Sort Field",
+            "Unknown sort field: '" + ex.getPropertyName() + "'. Please use a valid entity field.",
+            request.getRequestURI());
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  404 — CART NOT FOUND
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(com.eyeshop.cart.exception.CartNotFoundException.class)
+    public ResponseEntity<ApiError> handleCartNotFound(
+            com.eyeshop.cart.exception.CartNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  404 — CART ITEM NOT FOUND
+    // ═══════════════════════════════════════════════════════════════
+
+    @ExceptionHandler(com.eyeshop.cart.exception.CartItemNotFoundException.class)
+    public ResponseEntity<ApiError> handleCartItemNotFound(
+            com.eyeshop.cart.exception.CartItemNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
 
 }
 

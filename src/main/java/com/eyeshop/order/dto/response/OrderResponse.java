@@ -1,5 +1,6 @@
 package com.eyeshop.order.dto.response;
 
+import com.eyeshop.address.dto.response.AddressResponse;
 import com.eyeshop.order.entity.Status;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ public record OrderResponse(
     Status status,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
+    AddressResponse shippingAddress,                                 
     List<OrderItemResponse> items,
     List<OrderStatusHistoryResponse> statusHistory
 ) {}

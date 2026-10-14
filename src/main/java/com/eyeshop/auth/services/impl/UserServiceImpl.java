@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.eyeshop.auth.services.RefreshTokenService;
 import com.eyeshop.auth.services.AccountLockoutService;
+import com.eyeshop.common.dto.response.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -45,11 +48,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll()
-            .stream()
-            .map(UserMapper::toResponse)
-            .toList();
+    public PageResponse<UserResponse> getAllUsers(Pageable pageable) {
+        Page<User> page = userRepository.findAll(pageable);
+        return PageResponse.from(page, UserMapper::toResponse);
     }
 
     //Update User

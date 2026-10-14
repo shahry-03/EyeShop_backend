@@ -13,7 +13,8 @@ import java.util.ArrayList;
 @Entity
 @Table(name = "orders", indexes = {
     @Index(name = "orders_user_id_idx", columnList = "user_id"),
-    @Index(name = "orders_status_idx", columnList = "status")
+    @Index(name = "orders_status_idx", columnList = "status"),
+    @Index(name = "orders_shipping_address_idx", columnList = "shipping_address_id")  
 })
 @Getter
 @Setter
@@ -28,6 +29,9 @@ public class Order {
 
     @Column(name = "user_id", nullable = false)
     private UUID userId;
+
+    @Column(name = "shipping_address_id")
+    private Long shippingAddressId;
 
     @Column(name = "total_price", nullable = false)
     private Double totalPrice;

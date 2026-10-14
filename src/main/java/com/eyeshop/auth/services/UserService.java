@@ -3,8 +3,9 @@ package com.eyeshop.auth.services;
 import com.eyeshop.auth.dto.request.ChangePasswordRequest;
 import com.eyeshop.auth.dto.request.UpdateUserRequest;
 import com.eyeshop.auth.dto.response.UserResponse;
+import com.eyeshop.common.dto.response.PageResponse;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
@@ -13,7 +14,7 @@ public interface UserService {
 
     UserResponse getUserByEmail(String email);
 
-    List<UserResponse> getAllUsers();
+    PageResponse<UserResponse> getAllUsers(Pageable pageable);       // ← changed
 
     UserResponse updateUser(UUID userId, UpdateUserRequest request);
 

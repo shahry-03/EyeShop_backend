@@ -12,6 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.eyeshop.common.dto.response.PageResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
 import java.util.List;
 
@@ -41,11 +45,13 @@ public class OrderController {
     //  GET MY ORDERS
     // ─────────────────────────────────────────────
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> getMyOrders(
-            @AuthenticationPrincipal User user) {
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getMyOrders(
+            @AuthenticationPrincipal User user,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
 
-        List<OrderResponse> orders = orderService.getOrdersByUserId(user.getId());
-        return ResponseEntity.ok(ApiResponse.success(orders));
+        return ResponseEntity.ok(ApiResponse.success(
+            orderService.getOrdersByUserId(user.getId(), pageable)));
     }
 
     // ─────────────────────────────────────────────

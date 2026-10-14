@@ -1,5 +1,6 @@
 package com.eyeshop.product.service.impl;
 
+import com.eyeshop.common.dto.response.PageResponse;
 import com.eyeshop.product.dto.request.ProductAddRequest;
 import com.eyeshop.product.dto.request.ProductUpdateRequest;
 import com.eyeshop.product.dto.response.ProductResponse;
@@ -11,10 +12,10 @@ import com.eyeshop.product.repository.ProductRepository;
 import com.eyeshop.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -42,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
             .category(request.category())
             .build();
 
-        Product saved = productRepository.save(product);
+        Product saved = productRepository.saveAndFlush(product);
         log.info("Product created: id={}, name={}", saved.getId(), saved.getName());
 
         return ProductMapper.toResponse(saved);
@@ -62,7 +63,7 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(request.price());
         product.setCategory(request.category());
 
-        Product updated = productRepository.save(product);
+        Product updated = productRepository.saveAndFlush(product);
         log.info("Product updated: id={}", id);
 
         return ProductMapper.toResponse(updated);
@@ -94,19 +95,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll()
-            .stream()
-            .map(ProductMapper::toResponse)
-            .toList();
+    public PageResponse<ProductResponse> getAllProducts(Pageable pageable) {
+        Page<Product> page = productRepository.findAll(pageable);
+        return PageResponse.from(page, ProductMapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductResponse> getProductsByCategory(String category) {
-        return productRepository.findByCategory(category)
-            .stream()
-            .map(ProductMapper::toResponse)
-            .toList();
+    public PageResponse<ProductResponse> getProductsByCategory(String category, Pageable pageable) {
+        Page<Product> page = productRepository.findByCategory(category, pageable);
+        return PageResponse.from(page, ProductMapper::toResponse);
     }
 }

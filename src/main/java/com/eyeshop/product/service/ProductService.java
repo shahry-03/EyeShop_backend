@@ -1,10 +1,10 @@
 package com.eyeshop.product.service;
 
+import com.eyeshop.common.dto.response.PageResponse;
 import com.eyeshop.product.dto.request.ProductAddRequest;
 import com.eyeshop.product.dto.request.ProductUpdateRequest;
 import com.eyeshop.product.dto.response.ProductResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface ProductService {
 
@@ -16,7 +16,7 @@ public interface ProductService {
 
     ProductResponse getProductById(Long id);
 
-    List<ProductResponse> getAllProducts();
+    PageResponse<ProductResponse> getAllProducts(Pageable pageable);
 
-    List<ProductResponse> getProductsByCategory(String category);
+    PageResponse<ProductResponse> getProductsByCategory(String category, Pageable pageable);
 }
