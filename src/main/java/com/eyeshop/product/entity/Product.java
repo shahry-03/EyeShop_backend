@@ -51,6 +51,14 @@ public class Product {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "average_rating", nullable = false)
+    @Builder.Default
+    private Double averageRating = 0.0;
+
+    @Column(name = "total_reviews", nullable = false)
+    @Builder.Default
+    private Integer totalReviews = 0;
+
     /**
      * Optimistic locking — prevents concurrent stock updates from causing
      * race conditions. If two requests try to update the same product at the

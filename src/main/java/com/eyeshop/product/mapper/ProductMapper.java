@@ -22,10 +22,10 @@ public final class ProductMapper {
             product.getDescription(),
             product.getPrice(),
             product.getStock(),
-            product.getCategory() != null
-                ? CategoryMapper.toResponse(product.getCategory(), false)
-                : null,
-            toImageResponseList(product.getImages()),        // ← ADD
+            product.getCategory() != null ? CategoryMapper.toResponse(product.getCategory(), false) : null,
+            toImageResponseList(product.getImages()),
+            product.getAverageRating(),   
+            product.getTotalReviews(),    
             product.getCreatedAt()
         );
     }

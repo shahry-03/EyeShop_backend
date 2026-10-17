@@ -538,6 +538,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(error);
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    //  409 CONFLICT — ALREADY REVIEWED
+    // ═══════════════════════════════════════════════════════════════
+    @ExceptionHandler(com.eyeshop.review.exception.AlreadyReviewedException.class)
+    public ResponseEntity<ApiError> handleAlreadyReviewed(
+            com.eyeshop.review.exception.AlreadyReviewedException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.CONFLICT.value(),
+            "Already Reviewed",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
 
 }
 
