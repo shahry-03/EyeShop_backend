@@ -16,6 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.eyeshop.category.entity.Category; 
+import com.eyeshop.category.repository.CategoryRepository; 
+import com.eyeshop.auth.exception.ResourceNotFoundException; 
 
 @Slf4j
 @Service
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     // ═══════════════════════════════════════════════════════════
     //  CREATE
@@ -35,12 +39,17 @@ public class ProductServiceImpl implements ProductService {
                 "Product with this name already exists: " + request.name());
         }
 
+        Category category = categoryRepository.findById(request.categoryId())
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "Category not found: " + request.categoryId()
+            ));
+
         Product product = Product.builder()
             .name(request.name())
             .description(request.description())
             .price(request.price())
             .stock(request.stock())
-            .category(request.category())
+            .category(category)
             .build();
 
         Product saved = productRepository.saveAndFlush(product);
@@ -58,10 +67,15 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new ProductNotFoundException("Product not found: " + id));
 
+        Category category = categoryRepository.findById(request.categoryId())
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "Category not found: " + request.categoryId()
+            ));
+
         product.setName(request.name());
         product.setDescription(request.description());
         product.setPrice(request.price());
-        product.setCategory(request.category());
+        product.setCategory(category);
 
         Product updated = productRepository.saveAndFlush(product);
         log.info("Product updated: id={}", id);
@@ -102,8 +116,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<ProductResponse> getProductsByCategory(String category, Pageable pageable) {
-        Page<Product> page = productRepository.findByCategory(category, pageable);
+    public PageResponse<ProductResponse> getProductsByCategoryId(Long categoryId, Pageable pageable) {
+        Page<Product> page = productRepository.findByCategoryId(categoryId, pageable);
         return PageResponse.from(page, ProductMapper::toResponse);
     }
 }

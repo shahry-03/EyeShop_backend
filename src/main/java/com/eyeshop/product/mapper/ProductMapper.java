@@ -4,6 +4,7 @@ import com.eyeshop.product.dto.response.ProductImageResponse;
 import com.eyeshop.product.dto.response.ProductResponse;
 import com.eyeshop.product.entity.Product;
 import com.eyeshop.product.entity.ProductImage;
+import com.eyeshop.category.mapper.CategoryMapper;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,9 @@ public final class ProductMapper {
             product.getDescription(),
             product.getPrice(),
             product.getStock(),
-            product.getCategory(),
+            product.getCategory() != null
+                ? CategoryMapper.toResponse(product.getCategory(), false)
+                : null,
             toImageResponseList(product.getImages()),        // ← ADD
             product.getCreatedAt()
         );

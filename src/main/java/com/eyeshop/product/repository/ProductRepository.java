@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,11 +16,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // fetch product by name
     Optional<Product> findByName(String name);
 
-    // find products by category
-    List<Product> findByCategory(String category);
 
     // find product by name (for duplicate check)
     boolean existsByName(String name);
 
-    Page<Product> findByCategory(String category, Pageable pageable);
+    Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
 }

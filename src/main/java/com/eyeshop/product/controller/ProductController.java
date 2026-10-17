@@ -74,14 +74,14 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(productService.getProductById(id)));
     }
 
-    @GetMapping("/category/{category}")
+    @GetMapping("/category/{categoryId}") 
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getProductsByCategory(
-            @PathVariable String category,
+            @PathVariable Long categoryId, 
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
 
         return ResponseEntity.ok(ApiResponse.success(
-            productService.getProductsByCategory(category, pageable)));
+            productService.getProductsByCategoryId(categoryId, pageable))); 
     }
 }

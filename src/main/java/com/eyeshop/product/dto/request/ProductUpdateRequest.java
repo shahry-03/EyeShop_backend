@@ -3,6 +3,7 @@ package com.eyeshop.product.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 
 public record ProductUpdateRequest(
 
@@ -16,7 +17,6 @@ public record ProductUpdateRequest(
     @Positive(message = "Price must be greater than zero")
     double price,
 
-    @NotBlank(message = "Category cannot be empty")
-    @Size(max = 100, message = "Category must not exceed 100 characters")
-    String category
+    @NotNull(message = "Category ID is required")
+    Long categoryId
 ) {}

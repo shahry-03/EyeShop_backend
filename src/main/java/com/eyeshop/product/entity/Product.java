@@ -8,12 +8,13 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.util.ArrayList;
 import java.util.List;
+import com.eyeshop.category.entity.Category;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "products", indexes = {
-    @Index(name = "products_category_idx", columnList = "category"),
+    @Index(name = "products_category_idx", columnList = "category_id"), 
     @Index(name = "products_name_idx", columnList = "name")
 })
 @Getter
@@ -42,9 +43,9 @@ public class Product {
     @Min(value = 0, message = "Stock must be greater than or equal to zero")
     private int stock;
 
-    @Column(nullable = false, length = 100)
-    @NotBlank(message = "Category cannot be empty")
-    private String category;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

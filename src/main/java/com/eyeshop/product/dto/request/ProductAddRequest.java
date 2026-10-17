@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 
 public record ProductAddRequest(
 
@@ -20,7 +21,6 @@ public record ProductAddRequest(
     @Min(value = 0, message = "Stock must be greater than or equal to zero")
     int stock,
 
-    @NotBlank(message = "Category cannot be empty")
-    @Size(max = 100, message = "Category must not exceed 100 characters")
-    String category
+    @NotNull(message = "Category ID is required")
+    Long categoryId
 ) {}

@@ -1,5 +1,7 @@
 package com.eyeshop.product.dto.response;
 
+import com.eyeshop.category.dto.response.CategoryResponse;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -9,7 +11,7 @@ public record ProductResponse(
     String description,
     double price,
     int stock,
-    String category,
-    List<ProductImageResponse> images,      // ← ADD
+    CategoryResponse category,
+    List<ProductImageResponse> images,      
     LocalDateTime createdAt
 ) {}
