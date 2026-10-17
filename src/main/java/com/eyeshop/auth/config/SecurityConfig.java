@@ -11,11 +11,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-// import org.springframework.security.core.userdetails.User;
-// import org.springframework.security.core.userdetails.User.UserBuilder;
-// import org.springframework.security.core.userdetails.UserDetails;
-// import org.springframework.security.core.userdetails.UserDetailsService;
-// import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,6 +18,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.eyeshop.auth.security.JwtAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 // import tools.jackson.databind.ObjectMapper; // for spring boot version 4.x
 import com.fasterxml.jackson.databind.ObjectMapper; // for spring boot version 3.x
@@ -35,19 +31,23 @@ public class SecurityConfig {
         private AuthenticationSuccessHandler authenticationSuccessHandler;
         private UniversalAuthProperties properties;
 
+        private final CorsConfigurationSource corsConfigurationSource;
+
         public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                         AuthenticationSuccessHandler authenticationSuccessHandler,
-                        UniversalAuthProperties properties) {
+                        UniversalAuthProperties properties,
+                        CorsConfigurationSource corsConfigurationSource) {
                 this.jwtAuthenticationFilter = jwtAuthenticationFilter;
                 this.authenticationSuccessHandler = authenticationSuccessHandler;
                 this.properties = properties;
+                this.corsConfigurationSource = corsConfigurationSource;
         }
 
         @Bean
         public SecurityFilterChain SecurityFilterChain(HttpSecurity http) throws Exception {
                 http
                                 .csrf(csrf -> csrf.disable())
-                                .cors(Customizer.withDefaults())
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource))    // ← Explicit
                                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(AppConstants.AUTH_PUBLIC_URLS)

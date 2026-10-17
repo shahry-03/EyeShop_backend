@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.time.LocalDateTime;
 
@@ -57,4 +59,9 @@ public class Product {
     @Version
     @Column(nullable = false)
     private Long version;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("isPrimary DESC, displayOrder ASC, id ASC")
+    @Builder.Default
+    private List<ProductImage> images = new ArrayList<>();
 }

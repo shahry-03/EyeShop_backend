@@ -520,6 +520,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(error);
     }
 
+    // ═══════════════════════════════════════════════════════════
+    //  400 — IMAGE UPLOAD FAILED
+    // ═══════════════════════════════════════════════════════════
+
+    @ExceptionHandler(com.eyeshop.product.exception.ImageUploadException.class)
+    public ResponseEntity<ApiError> handleImageUpload(
+            com.eyeshop.product.exception.ImageUploadException ex,
+            HttpServletRequest request) {
+
+        ApiError error = ApiError.of(
+            HttpStatus.BAD_REQUEST.value(),
+            "Image Upload Failed",
+            ex.getMessage(),
+            request.getRequestURI());
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
 
 }
 

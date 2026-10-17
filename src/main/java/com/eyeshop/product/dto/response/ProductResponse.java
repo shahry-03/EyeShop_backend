@@ -1,6 +1,7 @@
 package com.eyeshop.product.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ProductResponse(
     Long id,
@@ -9,5 +10,6 @@ public record ProductResponse(
     double price,
     int stock,
     String category,
+    List<ProductImageResponse> images,      // ← ADD
     LocalDateTime createdAt
 ) {}
