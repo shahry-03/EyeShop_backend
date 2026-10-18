@@ -55,4 +55,12 @@ public class Order {
     @OrderBy("changedAt ASC")
     @Builder.Default
     private List<OrderStatusHistory> statusHistory = new ArrayList<>();
+
+
+    @Column(name = "discount_amount")
+    @Builder.Default
+    private Double discountAmount = 0.0;
+
+    @Column(name = "coupon_code", length = 50)
+    private String couponCode;
 }

@@ -36,6 +36,9 @@ import com.eyeshop.cart.repository.CartRepository;
 import com.eyeshop.cart.service.CartService;
 import com.eyeshop.order.dto.request.CheckoutRequest;
 import com.eyeshop.order.exception.EmptyCartException;
+import com.eyeshop.coupon.service.CouponService;
+import com.eyeshop.coupon.repository.CouponRepository;
+import com.eyeshop.coupon.entity.Coupon;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,6 +60,8 @@ public class OrderServiceImpl implements OrderService {
     private final AddressRepository addressRepository;
     private final CartRepository cartRepository;
     private final CartService cartService;
+    private final CouponService couponService;
+    private final CouponRepository couponRepository;
 
     /**
      * Allowed status transitions — the state machine.
@@ -360,18 +365,33 @@ public class OrderServiceImpl implements OrderService {
             orderItems.add(orderItem);
         }
 
-        // 5. Build order
+        // 5. Apply Coupon (if provided)
+        double discountAmount = 0.0;
+        String appliedCouponCode = null;
+
+        if (request.couponCode() != null && !request.couponCode().isBlank()) {
+            // validateAndCalculateDiscount throws InvalidCouponException if invalid
+            discountAmount = couponService.validateAndCalculateDiscount(request.couponCode(), totalPrice);
+            appliedCouponCode = request.couponCode().toUpperCase();
+            log.info("Coupon applied during checkout: code={}, discount={}", appliedCouponCode, discountAmount);
+        }
+
+        double finalTotalPrice = totalPrice - discountAmount;
+
+        // 6. Build order
         Order order = Order.builder()
             .userId(user.getId())
             .shippingAddressId(shippingAddress.getId())
-            .totalPrice(totalPrice)
+            .totalPrice(finalTotalPrice)        // <-- Updated with discounted price
+            .discountAmount(discountAmount)     // <-- Added
+            .couponCode(appliedCouponCode)      // <-- Added
             .status(Status.PLACED)
             .items(orderItems)
             .build();
 
         orderItems.forEach(item -> item.setOrder(order));
 
-        // 6. Initial status history
+        // 7. Initial status history
         order.getStatusHistory().add(OrderStatusHistory.builder()
             .order(order)
             .fromStatus(null)
@@ -380,14 +400,20 @@ public class OrderServiceImpl implements OrderService {
             .note("Order placed via cart checkout")
             .build());
 
-        // 7. Persist order
+        // 8. Persist order
         Order saved = orderRepository.save(order);
 
-        // 8. Clear the cart (same transaction — atomic)
+        // 9. Clear the cart (same transaction — atomic)
         cartService.emptyCartForUser(userId);
 
-        log.info("Checkout success: orderId={}, userId={}, items={}, total={}, addressId={}",
-            saved.getId(), userId, orderItems.size(), totalPrice, shippingAddress.getId());
+        // 10. Record coupon usage (only after successful save)
+        if (appliedCouponCode != null) {
+            Coupon coupon = couponService.getCouponByCode(appliedCouponCode);
+            couponService.recordUsage(coupon);
+        }
+
+        log.info("Checkout success: orderId={}, userId={}, items={}, subtotal={}, discount={}, total={}, addressId={}",
+            saved.getId(), userId, orderItems.size(), totalPrice, discountAmount, finalTotalPrice, shippingAddress.getId());
 
         return OrderMapper.toResponse(saved, shippingAddress);
     }

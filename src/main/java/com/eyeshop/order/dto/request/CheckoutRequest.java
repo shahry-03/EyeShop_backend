@@ -9,5 +9,7 @@ import jakarta.validation.constraints.NotNull;
 public record CheckoutRequest(
 
     @NotNull(message = "Shipping address is required")
-    Long shippingAddressId
+    Long shippingAddressId,
+
+    String couponCode // Optional (null/blank = no coupon)
 ) {}

@@ -14,7 +14,9 @@ public record OrderResponse(
     Status status,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
-    AddressResponse shippingAddress,                                 
+    AddressResponse shippingAddress,
+    Double discountAmount,
+    String couponCode,                                 
     List<OrderItemResponse> items,
     List<OrderStatusHistoryResponse> statusHistory
 ) {}

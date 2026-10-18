@@ -28,6 +28,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import com.eyeshop.order.exception.InsufficientStockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.eyeshop.auth.exception.InvalidTokenException;
+import com.eyeshop.coupon.exception.InvalidCouponException;
 
 @Slf4j
 @RestControllerAdvice
@@ -553,6 +554,24 @@ public class GlobalExceptionHandler {
             request.getRequestURI());
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    // Handle invalid coupon exceptions and return HTTP 400 Bad Request.
+    @ExceptionHandler(InvalidCouponException.class)
+    public ResponseEntity<ApiError> handleInvalidCoupon(
+            InvalidCouponException ex,
+            HttpServletRequest request) {
+
+        // Create an API error response containing the status, message, and request URI.
+        ApiError error = ApiError.of(
+            HttpStatus.BAD_REQUEST.value(),
+            "Invalid Coupon",
+            ex.getMessage(),
+            request.getRequestURI()
+        );
+
+        // Return the error response with HTTP 400 Bad Request status.
+        return ResponseEntity.badRequest().body(error);
     }
 
 

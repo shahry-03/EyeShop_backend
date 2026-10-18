@@ -30,6 +30,8 @@ public final class OrderMapper {
             order.getCreatedAt(),
             order.getUpdatedAt(),
             AddressMapper.toResponse(shippingAddress),
+            order.getDiscountAmount(), 
+            order.getCouponCode(),
             toItemResponseList(order.getItems()),
             toHistoryResponseList(order.getStatusHistory())
         );
