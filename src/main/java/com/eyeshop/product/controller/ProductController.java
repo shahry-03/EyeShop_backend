@@ -60,12 +60,18 @@ public class ProductController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getAllProducts(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+    public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> searchProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) Boolean inStock,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) 
             Pageable pageable) {
 
         return ResponseEntity.ok(ApiResponse.success(
-            productService.getAllProducts(pageable)));
+            productService.searchProducts(keyword, categoryId, minPrice, maxPrice, minRating, inStock, pageable)));
     }
 
     @GetMapping("/{id}")

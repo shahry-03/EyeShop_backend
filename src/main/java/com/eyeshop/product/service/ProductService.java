@@ -16,7 +16,15 @@ public interface ProductService {
 
     ProductResponse getProductById(Long id);
 
-    PageResponse<ProductResponse> getAllProducts(Pageable pageable);
+    PageResponse<ProductResponse> searchProducts(
+            String keyword, 
+            Long categoryId, 
+            Double minPrice, 
+            Double maxPrice, 
+            Double minRating, 
+            Boolean inStock, 
+            Pageable pageable);
 
+    
     PageResponse<ProductResponse> getProductsByCategoryId(Long categoryId, Pageable pageable);
 }

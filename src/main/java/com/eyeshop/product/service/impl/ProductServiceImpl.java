@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eyeshop.category.entity.Category; 
 import com.eyeshop.category.repository.CategoryRepository; 
 import com.eyeshop.auth.exception.ResourceNotFoundException; 
+import com.eyeshop.product.specification.ProductSpecification;
+import org.springframework.data.jpa.domain.Specification;
 
 @Slf4j
 @Service
@@ -107,17 +109,38 @@ public class ProductServiceImpl implements ProductService {
         return ProductMapper.toResponse(product);
     }
 
+    // ═══════════════════════════════════════════════════════════
+    //  SEARCH & FILTER (Dynamic)
+    // ═══════════════════════════════════════════════════════════
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<ProductResponse> getAllProducts(Pageable pageable) {
-        Page<Product> page = productRepository.findAll(pageable);
+    public PageResponse<ProductResponse> searchProducts(
+            String keyword,
+            Long categoryId,
+            Double minPrice,
+            Double maxPrice,
+            Double minRating,
+            Boolean inStock,
+            Pageable pageable) {
+
+        Specification<Product> spec =
+            ProductSpecification.withFilters(
+                keyword, categoryId, minPrice, maxPrice, minRating, inStock
+            );
+
+        Page<Product> page = productRepository.findAll(spec, pageable);
+
         return PageResponse.from(page, ProductMapper::toResponse);
     }
 
+    // ═══════════════════════════════════════════════════════════
+    //  GET BY CATEGORY (Static)
+    // ═══════════════════════════════════════════════════════════
     @Override
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> getProductsByCategoryId(Long categoryId, Pageable pageable) {
         Page<Product> page = productRepository.findByCategoryId(categoryId, pageable);
         return PageResponse.from(page, ProductMapper::toResponse);
     }
+
 }
