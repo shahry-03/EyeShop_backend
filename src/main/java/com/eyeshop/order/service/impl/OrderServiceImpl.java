@@ -39,6 +39,7 @@ import com.eyeshop.order.exception.EmptyCartException;
 import com.eyeshop.coupon.service.CouponService;
 import com.eyeshop.coupon.repository.CouponRepository;
 import com.eyeshop.coupon.entity.Coupon;
+import com.eyeshop.notification.service.NotificationService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,6 +63,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartService cartService;
     private final CouponService couponService;
     private final CouponRepository couponRepository;
+    private final NotificationService notificationService;
 
     /**
      * Allowed status transitions — the state machine.
@@ -296,6 +298,33 @@ public class OrderServiceImpl implements OrderService {
             .build());
 
         Order saved = orderRepository.save(order);
+
+        // UPDATED: Prepare a default notification for the new order status.
+        String title = "Order Status Updated";
+        String message = "Your order #" + orderId
+            + " status is now " + target.name();
+
+        // UPDATED: Customize the notification when the order is shipped.
+        if (target == Status.SHIPPED) {
+            title = "Order Shipped!";
+            message = "Your order #" + orderId + " has been shipped.";
+
+        // UPDATED: Customize the notification when the order is delivered.
+        } else if (target == Status.DELIVERED) {
+            title = "Order Delivered!";
+            message = "Your order #" + orderId
+                + " has been delivered. Thank you for shopping!";
+        }
+
+        // UPDATED: Notify the customer after saving the status change.
+        notificationService.sendNotification(
+            order.getUserId(),
+            title,
+            message,
+            "ORDER_" + target.name()
+        );
+
+        // Log the status change and the admin who performed it.
         log.info("Order status changed: id={}, {} → {}, by admin={}",
             orderId, current, target, adminUserId);
 
@@ -412,8 +441,25 @@ public class OrderServiceImpl implements OrderService {
             couponService.recordUsage(coupon);
         }
 
-        log.info("Checkout success: orderId={}, userId={}, items={}, subtotal={}, discount={}, total={}, addressId={}",
-            saved.getId(), userId, orderItems.size(), totalPrice, discountAmount, finalTotalPrice, shippingAddress.getId());
+        // UPDATED: Send a notification after the order has been saved successfully.
+        notificationService.sendNotification(
+           userId,
+           "Order Placed Successfully",
+           "Your order #" + saved.getId() + " has been placed successfully.",
+           "ORDER_PLACED"
+        );
+
+        // 11. Log successful checkout details.
+        log.info(
+           "Checkout success: orderId={}, userId={}, items={}, subtotal={}, discount={}, total={}, addressId={}",
+           saved.getId(),
+           userId,
+           orderItems.size(),
+           totalPrice,
+           discountAmount,
+           finalTotalPrice,
+           shippingAddress.getId()
+        );
 
         return OrderMapper.toResponse(saved, shippingAddress);
     }
