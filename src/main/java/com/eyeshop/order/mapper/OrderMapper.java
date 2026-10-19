@@ -39,7 +39,14 @@ public final class OrderMapper {
 
     public static OrderItemResponse toItemResponse(OrderItem item) {
         if (item == null) return null;
-        return new OrderItemResponse(item.getProductId(), item.getQuantity(), item.getPrice());
+        return new OrderItemResponse(
+            item.getProductId(),
+            item.getQuantity(),
+            item.getPrice(),
+            item.getSellerId(),
+            item.getSellerEarning(),
+            item.getPlatformEarning()
+        );
     }
 
     public static OrderStatusHistoryResponse toHistoryResponse(OrderStatusHistory h) {

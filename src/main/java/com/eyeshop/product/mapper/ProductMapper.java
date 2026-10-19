@@ -23,9 +23,10 @@ public final class ProductMapper {
             product.getPrice(),
             product.getStock(),
             product.getCategory() != null ? CategoryMapper.toResponse(product.getCategory(), false) : null,
+            product.getSeller() != null ? new ProductResponse.SellerSummary(product.getSeller().getId(), product.getSeller().getShopName()) : null, // <-- Map seller
             toImageResponseList(product.getImages()),
-            product.getAverageRating(),   
-            product.getTotalReviews(),    
+            product.getAverageRating(),
+            product.getTotalReviews(),
             product.getCreatedAt()
         );
     }

@@ -11,8 +11,12 @@ public record ProductResponse(
     double price,
     int stock,
     CategoryResponse category,
+    SellerSummary seller, // <-- YEH ADD HUA
     List<ProductImageResponse> images,
-    Double averageRating,     
-    Integer totalReviews,     
+    Double averageRating,
+    Integer totalReviews,
     LocalDateTime createdAt
-) {}
+) {
+    // Nested record for Seller info
+    public record SellerSummary(Long id, String shopName) {}
+}

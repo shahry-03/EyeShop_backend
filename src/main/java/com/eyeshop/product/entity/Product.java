@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.ArrayList;
 import java.util.List;
 import com.eyeshop.category.entity.Category;
+import com.eyeshop.seller.entity.Seller;
 
 import java.time.LocalDateTime;
 
@@ -73,4 +74,9 @@ public class Product {
     @OrderBy("isPrimary DESC, displayOrder ASC, id ASC")
     @Builder.Default
     private List<ProductImage> images = new ArrayList<>();
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
 }

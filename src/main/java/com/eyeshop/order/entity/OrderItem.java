@@ -32,4 +32,20 @@ public class OrderItem {
     @Column(nullable = false)
     private Double price;
 
+    /** Snapshot of seller who owns this product (null if admin's own product) */
+    @Column(name = "seller_id")
+    private Long sellerId;
+
+    /** Snapshot of commission rate at time of order (e.g., 10.0) */
+    @Column(name = "commission_rate")
+    private Double commissionRate;
+
+    /** Actual amount credited to seller (price * quantity * (1 - commission/100)) */
+    @Column(name = "seller_earning")
+    private Double sellerEarning;
+
+    /** Actual amount platform keeps (price * quantity * commission/100) */
+    @Column(name = "platform_earning")
+    private Double platformEarning;
+
 }

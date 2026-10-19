@@ -1,6 +1,7 @@
 package com.eyeshop.product.controller;
 
 import com.eyeshop.auth.dto.response.ApiResponse;
+import com.eyeshop.auth.entity.User;
 import com.eyeshop.common.dto.response.PageResponse;
 import com.eyeshop.product.dto.request.ProductAddRequest;
 import com.eyeshop.product.dto.request.ProductUpdateRequest;
@@ -14,6 +15,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,39 +25,63 @@ public class ProductController {
 
     private final ProductService productService;
 
+    // Helper method to check Admin role
+    private boolean isAdmin(User user) {
+        return user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
     // ═══════════════════════════════════════════════════════════
-    //  ADMIN — write operations
+    //  ADMIN / SELLER — write operations
     // ═══════════════════════════════════════════════════════════
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')") // Dono allowed hain
     public ResponseEntity<ApiResponse<ProductResponse>> addProduct(
+            @AuthenticationPrincipal User user,
             @Valid @RequestBody ProductAddRequest request) {
 
-        ProductResponse response = productService.addProduct(request);
+        ProductResponse response = productService.addProduct(user.getId(), isAdmin(user), request);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success("Product created", response));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
             @PathVariable Long id,
+            @AuthenticationPrincipal User user,
             @Valid @RequestBody ProductUpdateRequest request) {
 
-        ProductResponse response = productService.updateProduct(id, request);
+        ProductResponse response = productService.updateProduct(id, user.getId(), isAdmin(user), request);
         return ResponseEntity.ok(ApiResponse.success("Product updated", response));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id) {
-        productService.deleteProduct(id);
+    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user) {
+
+        productService.deleteProduct(id, user.getId(), isAdmin(user));
         return ResponseEntity.ok(ApiResponse.success("Product deleted"));
     }
 
     // ═══════════════════════════════════════════════════════════
-    //  PUBLIC (authenticated) — read operations
+    //  SELLER DASHBOARD — read own products
+    // ═══════════════════════════════════════════════════════════
+
+    @GetMapping("/my-products")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getMyProducts(
+            @AuthenticationPrincipal User user,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return ResponseEntity.ok(ApiResponse.success(
+            productService.getSellerProducts(user.getId(), pageable)));
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  PUBLIC — read operations
     // ═══════════════════════════════════════════════════════════
 
     @GetMapping
@@ -67,8 +93,7 @@ public class ProductController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) Double minRating,
             @RequestParam(required = false) Boolean inStock,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) 
-            Pageable pageable) {
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return ResponseEntity.ok(ApiResponse.success(
             productService.searchProducts(keyword, categoryId, minPrice, maxPrice, minRating, inStock, pageable)));
@@ -80,14 +105,13 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(productService.getProductById(id)));
     }
 
-    @GetMapping("/category/{categoryId}") 
+    @GetMapping("/category/{categoryId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getProductsByCategory(
-            @PathVariable Long categoryId, 
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable) {
+            @PathVariable Long categoryId,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return ResponseEntity.ok(ApiResponse.success(
-            productService.getProductsByCategoryId(categoryId, pageable))); 
+            productService.getProductsByCategoryId(categoryId, pageable)));
     }
 }
